@@ -30,6 +30,7 @@ SECRET_KEY = 'django-insecure-(l(5^6xm21%3fl_!@@m5@n3_(3!b79*@cf!44i9o1!*fo=$=70
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = ['https://cloth-store-backend.onrender.com','https://*.127.0.0.1']
 
 
 # Application definition
