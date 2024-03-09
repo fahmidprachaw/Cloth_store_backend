@@ -4,6 +4,7 @@ crispy-bootstrap5
 distlib
 dj-database-url
 Django
+django-cors-headers
 django-environ
 django-filter
 djangorestframework
