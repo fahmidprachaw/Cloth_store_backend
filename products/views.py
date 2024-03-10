@@ -162,14 +162,18 @@ class UserLoginApiView(APIView):
             password = serializer.validated_data.get('password')
 
             user = authenticate(username=username, password=password)
-            if user is not None:
-                # User is authenticated, generate token
-                token, _ = Token.objects.get_or_create(user=user)
-                login(request, user)
-                return Response({'token': token.key, 'user_id': user.id}, status=status.HTTP_200_OK)
+            if user:
+                if user.is_active:
+                    # User is authenticated and active, generate token
+                    token, _ = Token.objects.get_or_create(user=user)
+                    login(request, user)
+                    return Response({'token': token.key, 'user_id': user.id}, status=status.HTTP_200_OK)
+                else:
+                    # User account is inactive, return appropriate error message
+                    return Response({'error': 'Account is inactive'}, status=status.HTTP_401_UNAUTHORIZED)
             else:
-                # Authentication failed, return error message
-                return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+                # Authentication failed, return appropriate error message
+                return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             # Serializer validation failed, return error details
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
