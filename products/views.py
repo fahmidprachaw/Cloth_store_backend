@@ -134,24 +134,45 @@ def activate(request, uid64, token):
         return HttpResponseNotFound("Activation link is invalid or expired.")
 
     
+# class UserLoginApiView(APIView):
+#     def post(self, request):
+#         serializer = UserLoginSerializer(data = self.request.data)
+#         if serializer.is_valid():
+#             username = serializer.validated_data['username']
+#             password = serializer.validated_data['password']
+
+#             user = authenticate(username= username, password=password)
+            
+#             if user:
+#                 token, _ = Token.objects.get_or_create(user=user)
+#                 print(token)
+#                 print(_)
+#                 login(request, user)
+#                 return Response({'token' : token.key, 'user_id' : user.id})
+#             else:
+#                 return Response({'error' : "Invalid Credential"})
+#         return Response(serializer.errors)
+    
+
 class UserLoginApiView(APIView):
     def post(self, request):
-        serializer = UserLoginSerializer(data = self.request.data)
+        serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
-            username = serializer.validated_data['username']
-            password = serializer.validated_data['password']
+            username = serializer.validated_data.get('username')
+            password = serializer.validated_data.get('password')
 
-            user = authenticate(username= username, password=password)
-            
-            if user:
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                # User is authenticated, generate token
                 token, _ = Token.objects.get_or_create(user=user)
-                print(token)
-                print(_)
                 login(request, user)
-                return Response({'token' : token.key, 'user_id' : user.id})
+                return Response({'token': token.key, 'user_id': user.id}, status=status.HTTP_200_OK)
             else:
-                return Response({'error' : "Invalid Credential"})
-        return Response(serializer.errors)
+                # Authentication failed, return error message
+                return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            # Serializer validation failed, return error details
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class UserLogoutView(APIView):
     def get(self, request):
