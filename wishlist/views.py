@@ -47,7 +47,7 @@ class WishlistItemsAPIView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         try:
-            wishlist = Wishlist.objects.get(user=user)
+            wishlist = Wishlist.objects.filter(user=user).first()
             return [wishlist.item]
         except Wishlist.DoesNotExist:
             return []
